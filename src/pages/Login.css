@@ -1,0 +1,95 @@
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1b1a3a 0%, #464096 50%, #5b5fc7 100%);
+}
+
+.login-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 48px 40px;
+  width: 380px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  text-align: center;
+}
+
+.login-brand .portal-logo {
+  font-size: 40px;
+  margin-bottom: 8px;
+}
+
+.login-brand h1 {
+  font-size: 22px;
+  margin: 0 0 6px;
+  color: #1b1a3a;
+}
+
+.login-brand p {
+  font-size: 13px;
+  color: #6b6b78;
+  margin: 0 0 28px;
+}
+
+.teams-login-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #5b5fc7;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.teams-login-btn:hover:not(:disabled) {
+  background: #4750a8;
+}
+
+.teams-login-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.teams-icon {
+  font-size: 18px;
+}
+
+.login-divider {
+  margin: 24px 0 16px;
+  position: relative;
+  text-align: center;
+}
+
+.login-divider span {
+  background: #fff;
+  padding: 0 10px;
+  font-size: 11px;
+  color: #9a9aa6;
+  position: relative;
+  z-index: 1;
+}
+
+.login-divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #e5e5ea;
+}
+
+.login-footnote {
+  font-size: 11px;
+  color: #b0b0b8;
+  line-height: 1.5;
+  margin: 0;
+}
