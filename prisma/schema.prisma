@@ -1,0 +1,47 @@
+// Prisma schema for the poc-app directory (users + org chart).
+// learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id         String      @id @default(cuid())
+  name       String
+  email      String      @unique
+  role       String      @default("")
+  deleted    Boolean     @default(false)
+  createdAt  DateTime    @default(now())
+  assignment Assignment?
+}
+
+model Company {
+  id          String       @id @default(cuid())
+  name        String
+  departments Department[]
+}
+
+model Department {
+  id          String       @id @default(cuid())
+  name        String
+  companyId   String
+  company     Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  parentId    String?
+  parent      Department?  @relation("DeptTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children    Department[] @relation("DeptTree")
+  assignments Assignment[]
+}
+
+// One placement per user (userId is the primary key).
+model Assignment {
+  userId       String     @id
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  position     String     @default("")
+}

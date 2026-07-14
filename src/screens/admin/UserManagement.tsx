@@ -100,7 +100,7 @@ export default function UserManagement() {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
       try {
         const parsed = parseCsv(String(reader.result));
         const rows: NewUserInput[] = parsed.map((r) => ({
@@ -112,7 +112,7 @@ export default function UserManagement() {
         if (valid.length === 0) {
           flash("No rows with an email found. Use the template columns: Name, Email, Role.");
         } else {
-          const { created, updated } = dir.importUsers(valid);
+          const { created, updated } = await dir.importUsers(valid);
           flash(`Imported: ${created} created, ${updated} updated.`);
         }
       } catch {

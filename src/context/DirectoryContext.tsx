@@ -1,17 +1,20 @@
 "use client";
 
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
 import {
-  nextId,
-  seedAssignments,
-  seedCompanies,
-  seedDepartments,
-  seedUsers,
-  type Assignment,
-  type Company,
-  type Department,
-  type DirectoryUser,
-  type OrgInfo,
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
+import type {
+  Assignment,
+  Company,
+  Department,
+  DirectoryUser,
+  OrgInfo,
 } from "../data/directory";
 
 export interface NewUserInput {
@@ -20,31 +23,36 @@ export interface NewUserInput {
   role: string;
 }
 
-interface DirectoryContextValue {
+interface Snapshot {
   users: DirectoryUser[];
   companies: Company[];
   departments: Department[];
   assignments: Assignment[];
+}
+
+interface DirectoryContextValue extends Snapshot {
+  loading: boolean;
+  error: string | null;
 
   // User management (Name / Email / Role only)
-  createUser: (input: NewUserInput) => DirectoryUser;
-  updateUser: (id: string, input: NewUserInput) => void;
-  softDeleteUser: (id: string) => void;
-  restoreUser: (id: string) => void;
-  importUsers: (rows: NewUserInput[]) => { created: number; updated: number };
+  createUser: (input: NewUserInput) => Promise<void>;
+  updateUser: (id: string, input: NewUserInput) => Promise<void>;
+  softDeleteUser: (id: string) => Promise<void>;
+  restoreUser: (id: string) => Promise<void>;
+  importUsers: (rows: NewUserInput[]) => Promise<{ created: number; updated: number }>;
 
   // Org chart — company / department CRUD
-  addCompany: (name: string) => Company;
-  renameCompany: (id: string, name: string) => void;
-  deleteCompany: (id: string) => void;
-  addDepartment: (companyId: string, parentId: string | null, name: string) => Department;
-  renameDepartment: (id: string, name: string) => void;
-  deleteDepartment: (id: string) => void;
+  addCompany: (name: string) => Promise<void>;
+  renameCompany: (id: string, name: string) => Promise<void>;
+  deleteCompany: (id: string) => Promise<void>;
+  addDepartment: (companyId: string, parentId: string | null, name: string) => Promise<void>;
+  renameDepartment: (id: string, name: string) => Promise<void>;
+  deleteDepartment: (id: string) => Promise<void>;
 
   // Org chart — user placement
-  assignUser: (userId: string, departmentId: string, position?: string) => void;
-  updatePosition: (userId: string, position: string) => void;
-  unassignUser: (userId: string) => void;
+  assignUser: (userId: string, departmentId: string, position?: string) => Promise<void>;
+  updatePosition: (userId: string, position: string) => Promise<void>;
+  unassignUser: (userId: string) => Promise<void>;
 
   // Derived, real-time org info for a user
   getOrgInfo: (userId: string) => OrgInfo;
@@ -52,157 +60,68 @@ interface DirectoryContextValue {
 
 const DirectoryContext = createContext<DirectoryContextValue | undefined>(undefined);
 
+const EMPTY: Snapshot = { users: [], companies: [], departments: [], assignments: [] };
+
 export function DirectoryProvider({ children }: { children: ReactNode }) {
-  const [users, setUsers] = useState<DirectoryUser[]>(seedUsers);
-  const [companies, setCompanies] = useState<Company[]>(seedCompanies);
-  const [departments, setDepartments] = useState<Department[]>(seedDepartments);
-  const [assignments, setAssignments] = useState<Assignment[]>(seedAssignments);
+  const [snapshot, setSnapshot] = useState<Snapshot>(EMPTY);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const applySnapshot = useCallback((data: Snapshot) => {
+    setSnapshot({
+      users: data.users ?? [],
+      companies: data.companies ?? [],
+      departments: data.departments ?? [],
+      assignments: data.assignments ?? [],
+    });
+  }, []);
+
+  // Initial load from the database.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/directory");
+        if (!res.ok) throw new Error("Failed to load directory");
+        const data = (await res.json()) as Snapshot;
+        if (!cancelled) applySnapshot(data);
+      } catch (e) {
+        if (!cancelled) setError(e instanceof Error ? e.message : "Failed to load");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [applySnapshot]);
+
+  const post = useCallback(
+    async (action: string, payload: Record<string, unknown>) => {
+      const res = await fetch("/api/directory", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, payload }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data?.error ?? "Request failed");
+        throw new Error(data?.error ?? "Request failed");
+      }
+      applySnapshot(data as Snapshot);
+      return data as Snapshot & { created?: number; updated?: number };
+    },
+    [applySnapshot]
+  );
 
   const value = useMemo<DirectoryContextValue>(() => {
-    const findDept = (id: string) => departments.find((d) => d.id === id);
-    const findCompany = (id: string) => companies.find((c) => c.id === id);
-
-    const createUser: DirectoryContextValue["createUser"] = (input) => {
-      const user: DirectoryUser = {
-        id: nextId("u"),
-        name: input.name.trim(),
-        email: input.email.trim(),
-        role: input.role.trim(),
-        deleted: false,
-      };
-      setUsers((prev) => [...prev, user]);
-      return user;
-    };
-
-    const updateUser: DirectoryContextValue["updateUser"] = (id, input) => {
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.id === id
-            ? { ...u, name: input.name.trim(), email: input.email.trim(), role: input.role.trim() }
-            : u
-        )
-      );
-    };
-
-    const softDeleteUser: DirectoryContextValue["softDeleteUser"] = (id) => {
-      setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, deleted: true } : u)));
-      // A deleted user leaves the org chart.
-      setAssignments((prev) => prev.filter((a) => a.userId !== id));
-    };
-
-    const restoreUser: DirectoryContextValue["restoreUser"] = (id) => {
-      setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, deleted: false } : u)));
-    };
-
-    const importUsers: DirectoryContextValue["importUsers"] = (rows) => {
-      let created = 0;
-      let updated = 0;
-      setUsers((prev) => {
-        const next = [...prev];
-        for (const row of rows) {
-          const email = row.email.trim().toLowerCase();
-          if (!email) continue;
-          const idx = next.findIndex((u) => u.email.trim().toLowerCase() === email);
-          if (idx >= 0) {
-            next[idx] = {
-              ...next[idx],
-              name: row.name.trim() || next[idx].name,
-              role: row.role.trim() || next[idx].role,
-              deleted: false,
-            };
-            updated++;
-          } else {
-            next.push({
-              id: nextId("u"),
-              name: row.name.trim(),
-              email: row.email.trim(),
-              role: row.role.trim(),
-              deleted: false,
-            });
-            created++;
-          }
-        }
-        return next;
-      });
-      return { created, updated };
-    };
-
-    const addCompany: DirectoryContextValue["addCompany"] = (name) => {
-      const company: Company = { id: nextId("co"), name: name.trim() || "Untitled Company" };
-      setCompanies((prev) => [...prev, company]);
-      return company;
-    };
-
-    const renameCompany: DirectoryContextValue["renameCompany"] = (id, name) => {
-      setCompanies((prev) => prev.map((c) => (c.id === id ? { ...c, name: name.trim() } : c)));
-    };
-
-    const deleteCompany: DirectoryContextValue["deleteCompany"] = (id) => {
-      const deptIds = departments.filter((d) => d.companyId === id).map((d) => d.id);
-      setAssignments((prev) => prev.filter((a) => !deptIds.includes(a.departmentId)));
-      setDepartments((prev) => prev.filter((d) => d.companyId !== id));
-      setCompanies((prev) => prev.filter((c) => c.id !== id));
-    };
-
-    const addDepartment: DirectoryContextValue["addDepartment"] = (companyId, parentId, name) => {
-      const dept: Department = {
-        id: nextId("dep"),
-        companyId,
-        parentId,
-        name: name.trim() || "Untitled Department",
-      };
-      setDepartments((prev) => [...prev, dept]);
-      return dept;
-    };
-
-    const renameDepartment: DirectoryContextValue["renameDepartment"] = (id, name) => {
-      setDepartments((prev) => prev.map((d) => (d.id === id ? { ...d, name: name.trim() } : d)));
-    };
-
-    const deleteDepartment: DirectoryContextValue["deleteDepartment"] = (id) => {
-      // Collect this department and all descendants.
-      const toRemove = new Set<string>([id]);
-      let grew = true;
-      while (grew) {
-        grew = false;
-        for (const d of departments) {
-          if (d.parentId && toRemove.has(d.parentId) && !toRemove.has(d.id)) {
-            toRemove.add(d.id);
-            grew = true;
-          }
-        }
-      }
-      setAssignments((prev) => prev.filter((a) => !toRemove.has(a.departmentId)));
-      setDepartments((prev) => prev.filter((d) => !toRemove.has(d.id)));
-    };
-
-    const assignUser: DirectoryContextValue["assignUser"] = (userId, departmentId, position = "") => {
-      setAssignments((prev) => {
-        const existing = prev.find((a) => a.userId === userId);
-        if (existing) {
-          return prev.map((a) =>
-            a.userId === userId
-              ? { ...a, departmentId, position: position || a.position }
-              : a
-          );
-        }
-        return [...prev, { userId, departmentId, position }];
-      });
-    };
-
-    const updatePosition: DirectoryContextValue["updatePosition"] = (userId, position) => {
-      setAssignments((prev) => prev.map((a) => (a.userId === userId ? { ...a, position } : a)));
-    };
-
-    const unassignUser: DirectoryContextValue["unassignUser"] = (userId) => {
-      setAssignments((prev) => prev.filter((a) => a.userId !== userId));
-    };
+    const { users, companies, departments, assignments } = snapshot;
 
     const getOrgInfo: DirectoryContextValue["getOrgInfo"] = (userId) => {
       const assignment = assignments.find((a) => a.userId === userId);
       if (!assignment) return { company: "—", department: "—", position: "—" };
-      const dept = findDept(assignment.departmentId);
-      const company = dept ? findCompany(dept.companyId) : undefined;
+      const dept = departments.find((d) => d.id === assignment.departmentId);
+      const company = dept ? companies.find((c) => c.id === dept.companyId) : undefined;
       return {
         company: company?.name ?? "—",
         department: dept?.name ?? "—",
@@ -215,23 +134,31 @@ export function DirectoryProvider({ children }: { children: ReactNode }) {
       companies,
       departments,
       assignments,
-      createUser,
-      updateUser,
-      softDeleteUser,
-      restoreUser,
-      importUsers,
-      addCompany,
-      renameCompany,
-      deleteCompany,
-      addDepartment,
-      renameDepartment,
-      deleteDepartment,
-      assignUser,
-      updatePosition,
-      unassignUser,
+      loading,
+      error,
+      createUser: async (input) => void (await post("createUser", { ...input })),
+      updateUser: async (id, input) => void (await post("updateUser", { id, ...input })),
+      softDeleteUser: async (id) => void (await post("softDeleteUser", { id })),
+      restoreUser: async (id) => void (await post("restoreUser", { id })),
+      importUsers: async (rows) => {
+        const data = await post("importUsers", { rows });
+        return { created: data.created ?? 0, updated: data.updated ?? 0 };
+      },
+      addCompany: async (name) => void (await post("addCompany", { name })),
+      renameCompany: async (id, name) => void (await post("renameCompany", { id, name })),
+      deleteCompany: async (id) => void (await post("deleteCompany", { id })),
+      addDepartment: async (companyId, parentId, name) =>
+        void (await post("addDepartment", { companyId, parentId, name })),
+      renameDepartment: async (id, name) => void (await post("renameDepartment", { id, name })),
+      deleteDepartment: async (id) => void (await post("deleteDepartment", { id })),
+      assignUser: async (userId, departmentId, position) =>
+        void (await post("assignUser", { userId, departmentId, position })),
+      updatePosition: async (userId, position) =>
+        void (await post("updatePosition", { userId, position })),
+      unassignUser: async (userId) => void (await post("unassignUser", { userId })),
       getOrgInfo,
     };
-  }, [users, companies, departments, assignments]);
+  }, [snapshot, loading, error, post]);
 
   return <DirectoryContext.Provider value={value}>{children}</DirectoryContext.Provider>;
 }
