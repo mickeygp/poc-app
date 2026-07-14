@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import type { ReactNode } from "react";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { DirectoryProvider } from "./context/DirectoryContext";
 import Login from "./pages/Login";
 import Launcher from "./pages/Launcher";
 import ChildApp from "./pages/ChildApp";
@@ -48,7 +49,9 @@ function AppRoutes() {
 export default function App() {
   return (
     <AuthProvider>
-      <AppRoutes />
+      <DirectoryProvider>
+        <AppRoutes />
+      </DirectoryProvider>
     </AuthProvider>
   );
 }

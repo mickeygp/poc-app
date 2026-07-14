@@ -2,6 +2,7 @@ import { useState } from "react";
 import AppShell from "../components/AppShell";
 import MockContent from "../components/MockContent";
 import { apps, administrationApp } from "../data/apps";
+import UserManagement from "./admin/UserManagement";
 import "./Administration.css";
 
 export default function Administration() {
@@ -67,6 +68,9 @@ export default function Administration() {
                 </div>
               </div>
             );
+
+          case "user-management":
+            return <UserManagement />;
 
           case "user-access":
             return (

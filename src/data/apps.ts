@@ -37,6 +37,7 @@ export const apps: AppDef[] = [
     description: "Human Resources Management",
     menu: [
       { id: "dashboard", label: "Dashboard", icon: "📊" },
+      { id: "org-chart", label: "Org Chart Builder", icon: "🏢" },
       { id: "employee-directory", label: "Employee Directory", icon: "👥" },
       { id: "leave-management", label: "Leave Management", icon: "🏖️" },
       { id: "payroll", label: "Payroll", icon: "💰" },
@@ -85,6 +86,7 @@ export const administrationApp: AppDef = {
   menu: [
     { id: "overview", label: "Overview", icon: "📊" },
     { id: "app-management", label: "App Management", icon: "🧰" },
+    { id: "user-management", label: "User Management", icon: "👤" },
     { id: "user-access", label: "User & Role Access", icon: "🔐" },
     { id: "audit-log", label: "Audit Log", icon: "🧾" },
     { id: "system-settings", label: "System Settings", icon: "🛠️" },

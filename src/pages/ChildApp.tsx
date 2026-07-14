@@ -3,6 +3,7 @@ import AppShell from "../components/AppShell";
 import MockContent from "../components/MockContent";
 import { apps } from "../data/apps";
 import { childAppContent } from "../data/childAppContent";
+import OrgChartBuilder from "./hr/OrgChartBuilder";
 
 export default function ChildApp() {
   const { appId } = useParams<{ appId: string }>();
@@ -13,6 +14,10 @@ export default function ChildApp() {
   return (
     <AppShell app={app}>
       {(activeMenuId) => {
+        if (app.id === "hr-tools" && activeMenuId === "org-chart") {
+          return <OrgChartBuilder />;
+        }
+
         const content = childAppContent[app.id]?.[activeMenuId];
         const menuItem = app.menu.find((m) => m.id === activeMenuId);
         return (

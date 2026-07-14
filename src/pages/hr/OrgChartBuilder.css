@@ -1,0 +1,348 @@
+.oc-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+/* Palette */
+.oc-palette {
+  background: #fff;
+  border: 1px solid #e5e5ea;
+  border-radius: 12px;
+  padding: 16px;
+  position: sticky;
+  top: 20px;
+}
+
+.oc-palette-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.oc-palette-head h3 {
+  margin: 0;
+  font-size: 15px;
+  color: #1b1a3a;
+}
+
+.oc-count {
+  font-size: 11px;
+  color: #8a8a94;
+}
+
+.oc-palette-hint {
+  font-size: 11px;
+  color: #a0a0ac;
+  margin: 6px 0 12px;
+  line-height: 1.4;
+}
+
+.oc-people-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.oc-person {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid #e5e5ea;
+  border-radius: 8px;
+  background: #fbfbfd;
+  cursor: grab;
+}
+
+.oc-person:active {
+  cursor: grabbing;
+}
+
+.oc-person-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--accent, #16a34a);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.oc-person-avatar.sm {
+  width: 26px;
+  height: 26px;
+  font-size: 10px;
+}
+
+.oc-person-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1b1a3a;
+}
+
+.oc-person-role {
+  font-size: 11px;
+  color: #8a8a94;
+}
+
+.oc-palette-empty {
+  font-size: 12px;
+  color: #a0a0ac;
+  text-align: center;
+  padding: 16px 8px;
+  line-height: 1.5;
+}
+
+/* Chart */
+.oc-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.oc-company {
+  background: #fff;
+  border: 1px solid #e5e5ea;
+  border-radius: 12px;
+  padding: 16px 18px;
+}
+
+.oc-company-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f5;
+  margin-bottom: 12px;
+}
+
+.oc-company-icon {
+  font-size: 18px;
+}
+
+.oc-company-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1b1a3a;
+  cursor: text;
+}
+
+/* Tree */
+.oc-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.oc-tree-empty {
+  font-size: 12px;
+  color: #a0a0ac;
+  padding: 8px 4px;
+}
+
+.oc-node {
+  position: relative;
+}
+
+.oc-children {
+  margin-left: 26px;
+  padding-left: 18px;
+  border-left: 2px solid #e5e5ea;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.oc-node-box {
+  border: 1px solid #e5e5ea;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #fbfbfd;
+  transition: 0.15s;
+}
+
+.oc-drop-active {
+  border-color: var(--accent, #16a34a);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent, #16a34a) 25%, transparent);
+  background: color-mix(in srgb, var(--accent, #16a34a) 6%, #fff);
+}
+
+.oc-node-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.oc-node-icon {
+  font-size: 14px;
+}
+
+.oc-node-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1b1a3a;
+  cursor: text;
+}
+
+.oc-node-actions {
+  display: flex;
+  gap: 2px;
+  margin-left: auto;
+}
+
+.oc-icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 3px 5px;
+  border-radius: 6px;
+  opacity: 0.55;
+  transition: 0.15s;
+}
+
+.oc-icon-btn:hover {
+  opacity: 1;
+  background: #f0f0f5;
+}
+
+.oc-inline-input {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border: 1px solid var(--accent, #16a34a);
+  border-radius: 6px;
+  outline: none;
+  min-width: 160px;
+}
+
+/* Members */
+.oc-members {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.oc-member {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid #e5e5ea;
+  border-radius: 999px;
+  padding: 4px 10px 4px 4px;
+  cursor: grab;
+}
+
+.oc-member:active {
+  cursor: grabbing;
+}
+
+.oc-member-meta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.oc-member-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1b1a3a;
+}
+
+.oc-position {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 10px;
+  color: #8a8a94;
+  cursor: pointer;
+  text-align: left;
+}
+
+.oc-position:hover {
+  color: var(--accent, #16a34a);
+  text-decoration: underline;
+}
+
+.oc-member-remove {
+  background: none;
+  border: none;
+  color: #b4b4c4;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+.oc-member-remove:hover {
+  color: #dc2626;
+}
+
+.oc-drop-hint {
+  font-size: 11px;
+  color: #b4b4c4;
+  font-style: italic;
+  padding: 4px 2px;
+}
+
+/* Add rows */
+.oc-add-dept input,
+.oc-add-company input {
+  font-size: 13px;
+  padding: 8px 11px;
+  border: 1px solid #d8d8e0;
+  border-radius: 8px;
+  outline: none;
+  min-width: 220px;
+}
+
+.oc-add-dept input:focus,
+.oc-add-company input:focus {
+  border-color: var(--accent, #16a34a);
+}
+
+.oc-add-company {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding-top: 4px;
+}
+
+.oc-btn {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #d8d8e0;
+  background: #fff;
+  color: #44445a;
+  cursor: pointer;
+}
+
+.oc-btn-primary {
+  background: var(--accent, #16a34a);
+  border-color: var(--accent, #16a34a);
+  color: #fff;
+}
+
+.oc-danger:hover {
+  background: #fdecec;
+}
+
+@media (max-width: 720px) {
+  .oc-layout {
+    grid-template-columns: 1fr;
+  }
+  .oc-palette {
+    position: static;
+  }
+}
