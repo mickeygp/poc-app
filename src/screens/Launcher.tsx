@@ -1,15 +1,17 @@
-import { useNavigate } from "react-router-dom";
+"use client";
+
+import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import { apps, administrationApp } from "../data/apps";
 import "./Launcher.css";
 
 export default function Launcher() {
   const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleLogout = () => {
     logout();
-    navigate("/");
+    router.push("/");
   };
 
   return (
@@ -42,7 +44,7 @@ export default function Launcher() {
                 key={app.id}
                 className="app-tile"
                 style={{ "--accent": app.color } as React.CSSProperties}
-                onClick={() => navigate(`/app/${app.id}`)}
+                onClick={() => router.push(`/app/${app.id}`)}
               >
                 <div className="app-tile-icon">{app.icon}</div>
                 <div className="app-tile-name">{app.name}</div>
@@ -58,7 +60,7 @@ export default function Launcher() {
             <button
               className="app-tile admin-tile"
               style={{ "--accent": administrationApp.color } as React.CSSProperties}
-              onClick={() => navigate(`/app/${administrationApp.id}`)}
+              onClick={() => router.push(`/app/${administrationApp.id}`)}
             >
               <div className="app-tile-icon">{administrationApp.icon}</div>
               <div className="app-tile-name">{administrationApp.name}</div>

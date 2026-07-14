@@ -1,3 +1,5 @@
+"use client";
+
 import { useMemo, useRef, useState } from "react";
 import { useDirectory, type NewUserInput } from "../../context/DirectoryContext";
 import type { DirectoryUser } from "../../data/directory";

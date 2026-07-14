@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import AppShell from "../components/AppShell";
 import MockContent from "../components/MockContent";

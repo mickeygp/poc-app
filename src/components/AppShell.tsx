@@ -1,5 +1,7 @@
+"use client";
+
 import { useState, type ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import type { AppDef } from "../data/apps";
 import "./AppShell.css";
 
@@ -10,13 +12,13 @@ interface AppShellProps {
 
 export default function AppShell({ app, children }: AppShellProps) {
   const [activeMenuId, setActiveMenuId] = useState(app.menu[0]?.id ?? "");
-  const navigate = useNavigate();
+  const router = useRouter();
 
   return (
     <div className="app-shell" style={{ "--accent": app.color } as React.CSSProperties}>
       <aside className="app-shell-sidebar">
         <div className="app-shell-brand">
-          <button className="back-btn" onClick={() => navigate("/launcher")} title="Back to Launcher">
+          <button className="back-btn" onClick={() => router.push("/launcher")} title="Back to Launcher">
             ←
           </button>
           <span className="app-shell-icon">{app.icon}</span>

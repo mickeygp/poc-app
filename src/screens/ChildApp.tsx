@@ -1,4 +1,7 @@
-import { useParams, Navigate } from "react-router-dom";
+"use client";
+
+import { useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
 import AppShell from "../components/AppShell";
 import MockContent from "../components/MockContent";
 import { apps } from "../data/apps";
@@ -6,10 +9,15 @@ import { childAppContent } from "../data/childAppContent";
 import OrgChartBuilder from "./hr/OrgChartBuilder";
 
 export default function ChildApp() {
-  const { appId } = useParams<{ appId: string }>();
-  const app = apps.find((a) => a.id === appId);
+  const params = useParams<{ appId: string }>();
+  const router = useRouter();
+  const app = apps.find((a) => a.id === params?.appId);
 
-  if (!app) return <Navigate to="/launcher" replace />;
+  useEffect(() => {
+    if (!app) router.replace("/launcher");
+  }, [app, router]);
+
+  if (!app) return null;
 
   return (
     <AppShell app={app}>

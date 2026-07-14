@@ -1,11 +1,13 @@
+"use client";
+
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import "./Login.css";
 
 export default function Login() {
   const { login } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   const handleTeamsLogin = () => {
@@ -13,7 +15,7 @@ export default function Login() {
     setTimeout(() => {
       login();
       setLoading(false);
-      navigate("/launcher");
+      router.push("/launcher");
     }, 900);
   };
 
